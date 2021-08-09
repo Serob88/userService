@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
+
   public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
     this.authenticationManager = authenticationManager;
   }
@@ -39,7 +39,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     log.info("UserName is: {}", userName);
     log.info("Password is: {}", password);
 
-    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userName, password);
+    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+        userName, password);
     return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
   }
 
@@ -52,7 +53,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         .withSubject(user.getUsername())
         .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
         .withIssuer(request.getRequestURL().toString())
-        .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+        .withClaim("roles",
+            user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
         .sign(algorithm);
 
     String refresh_token = JWT.create()
